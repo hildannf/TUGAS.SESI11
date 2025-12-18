@@ -1,0 +1,70 @@
+const express = require("express");
+const db = require("./db");
+const app = express();
+const logging = require('./middleware/logging');
+const logging = require("./middleware/logging");
+const validasiProduk = require("./middleware/validasiProduk");
+const auth = require('./middleware/auth');
+ 
+app.use(logging)
+const auth = require("./middleware/auth");
+const EksekusiWaktu = require("./middleware/EksekusiWaktu");
+const JamOperasional = require("./middleware/JamOperasional");
+
+app.use(EksekusiWaktu);
+app.use(JamOperasional);
+app.use(logging);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+@@ -67,7 +71,7 @@
+  );
+});
+
+app.post("/produk", validasiProduk , (req, res) => {
+app.post("/produk", validasiProduk, (req, res) => {
+  const { nama_produk, jml_stock, harga } = req.body;
+
+  if (!nama_produk || jml_stock == null || harga == null) {
+@@ -134,40 +138,40 @@
+  );
+});
+
+app.delete("/produk/:id", auth , (req, res) => {
+app.delete("/produk/:id", auth, (req, res) => {
+  const id_produk = req.params.id;
+
+  db.query(
+    "DELETE FROM produk WHERE id_produk=?",
+    [id_produk],
+    (err, result) => {
+      if (err) {
+        console.error("DB error (DELETE /produk/:id):", err);
+        return res
+          .status(500)
+          .json({ error: "Gagal menghapus produk", detail: err.message });
+      }
+      if (result.affectedRows === 0) {
+        return res
+          .status(404)
+          .json({ error: "Produk tidak ditemukan", id: id_produk });
+      }
+      res.json({ message: `Produk ID ${id_produk} berhasil dihapus` });
+    }
+  );
+});
+
+app.use((req, res) => {
+  res
+    .status(404)
+    .json({ error: "Route tidak ditemukan", path: req.originalUrl });
+});
+
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Internal server error", detail: err.message });
+});
+
+app.listen(3000, () =>
+  console.log("Server berjalan di port http://localhost:3000")
+);
